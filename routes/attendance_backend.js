@@ -91,6 +91,11 @@ router.post('/mark', auth, async (req, res) => {
     const existing = await Attendance.findOne({ studentId, date });
     if (existing) return res.json(existing);
     const record = await Attendance.create({ studentId, courseId, date, status });
+    // Emit real-time update via Socket.IO
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${studentId}`).emit('attendance-update', { status, date, studentId });
+    }
     res.json(record);
   } catch (err) {
     res.status(400).json({ message: err.message });

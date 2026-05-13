@@ -92,12 +92,72 @@ router.patch('/submit', auth, async (req, res) => {
       { status: 'submitted', submittedAt: new Date() },
       { new: true }
     );
+    // Emit real-time update via Socket.IO
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${traineeId}`).emit('submission-update', {
+        status: 'submitted', date, traineeId
+      });
+    }
     res.json(submission);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
+
+// ── GET /api/submissions/admin/all  (teacher/admin only — all trainees' submissions)
+router.get('/admin/all', auth, async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const Question = require('../models/Question');
+
+    // Optional filters: ?date=2026-05-13 or ?traineeId=xxx
+    const filter = {};
+    if (req.query.date)      filter.date      = req.query.date;
+    if (req.query.traineeId) filter.traineeId = req.query.traineeId;
+
+    const submissions = await AssignmentSubmission.find(filter)
+      .sort({ submittedAt: -1, createdAt: -1 })
+      .lean();
+
+    // Attach trainee name + populate question texts for answers
+    const traineeIds = [...new Set(submissions.map(s => s.traineeId.toString()))];
+    const users = await User.find({ _id: { $in: traineeIds } }).select('name email').lean();
+    const userMap = {};
+    users.forEach(u => { userMap[u._id.toString()] = u; });
+
+    // For each submission, attach question text to each answer
+    const enriched = await Promise.all(submissions.map(async (sub) => {
+      const questions = await Question.find({ courseId: sub.courseId, date: sub.date }).lean();
+      const qMap = {};
+      questions.forEach(q => { qMap[q._id.toString()] = q; });
+
+      const enrichSec = (sec) => ({
+        ...sec,
+        answers: (sec?.answers || []).map(a => ({
+          ...a,
+          questionText: qMap[a.questionId?.toString()]?.text || 'Question not found',
+          marks: qMap[a.questionId?.toString()]?.marks || 0,
+          section: qMap[a.questionId?.toString()]?.section || '',
+        }))
+      });
+
+      return {
+        ...sub,
+        trainee: userMap[sub.traineeId.toString()] || { name: 'Unknown', email: '' },
+        secA: enrichSec(sub.secA),
+        secB: enrichSec(sub.secB),
+        secC: enrichSec(sub.secC),
+      };
+    }));
+
+    res.json(enriched);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: err.message });
+  }
+});
 
 // ── GET /api/submissions/leaderboard
 router.get('/leaderboard', auth, async (req, res) => {
