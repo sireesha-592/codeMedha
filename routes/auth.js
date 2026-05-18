@@ -121,4 +121,18 @@ router.post('/fix-enrollments', auth, async (req, res) => {
   }
 });
 
+
+// Admin dashboard stats
+router.get('/admin-stats', auth, async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const users = await User.find({});
+    const students = users.filter(u => u.role === 'student').length;
+    const trainers = users.filter(u => u.role === 'trainer' || u.role === 'teacher').length;
+    res.json({ students, trainers, total: users.length });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
