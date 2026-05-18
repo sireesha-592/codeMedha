@@ -31,7 +31,7 @@ const upload = multer({
 /* ── Admin: upload today's class ── */
 router.post('/upload', auth, upload.single('video'), async (req, res) => {
   try {
-    const { courseId, date, title } = req.body;
+    const { courseId, date, title, attendanceDeadline } = req.body;
     // Expire ALL previous classes (not just same courseId)
     await DailyClass.updateMany({}, { isActive: false });
     const classDate = new Date(date + 'T00:00:00');
@@ -42,6 +42,7 @@ router.post('/upload', auth, upload.single('video'), async (req, res) => {
       videoPath: req.file.path,
       isActive:  true,
       expiresAt,
+      attendanceDeadline: attendanceDeadline ? new Date(attendanceDeadline) : null,
     });
     res.json({ message: 'Class uploaded successfully', dailyClass });
   } catch (err) {
@@ -166,6 +167,22 @@ router.get('/stream/:id', async (req, res) => {
   } catch (err) {
     console.error('Stream error:', err);
     res.status(500).json({ message: err.message });
+  }
+});
+
+/* ── Admin: update attendance deadline for a class ── */
+router.patch('/attendance-deadline/:id', auth, async (req, res) => {
+  try {
+    const { attendanceDeadline } = req.body;
+    const updated = await DailyClass.findByIdAndUpdate(
+      req.params.id,
+      { attendanceDeadline: attendanceDeadline ? new Date(attendanceDeadline) : null },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'Class not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 
