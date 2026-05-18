@@ -24,7 +24,7 @@ const io = new Server(server, {
 app.set('io', io);
 
 // ── Middleware ────────────────────────────────────────────────
-const ALLOWED_ORIGINS = ['http://localhost:3000','https://lms-codemedha.netlify.app', 'https://code-medha-frontend.vercel.app', 'capacitor://localhost', 'http://localhost', 'http://localhost:5000', 'file://', null];
+const ALLOWED_ORIGINS = ['http://localhost:3000','https://lms-codemedha.netlify.app', 'https://code-medha-frontend.vercel.app', 'capacitor://localhost', 'http://localhost', 'https://localhost', 'http://localhost:5000', 'file://', null];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
