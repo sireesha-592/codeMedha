@@ -24,7 +24,7 @@ router.get('/dashboard', auth, trainerOnly, async (req, res) => {
     const { User, Attendance, Submission } = getModels();
     const today = new Date().toISOString().split('T')[0];
 
-    const students = await User.find({ role: { $in: ['student'] } }).lean();
+    const students = await User.find({ role: { $in: ['student', 'trainee'] } }).lean();
     const totalStudents = students.length;
     const studentIds = students.map(s => s._id);
 

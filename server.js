@@ -52,7 +52,7 @@ app.use('/api/doubts',        require('./routes/doubts'));
 app.use('/api/resources',     require('./routes/resources'));
 app.use('/api/session-notes', require('./routes/session-notes'));
 app.use('/api/sessions', require('./routes/sessions'));
-
+app.use('/api/run-code', require('./routes/run-code'));
 // ── Weekly Report ─────────────────────────────────────────────
 app.get('/api/weekly-report', auth, async (req, res) => {
   try {
@@ -254,4 +254,5 @@ mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => console.error('❌ DB Error:', err));
+  
 module.exports = { io };

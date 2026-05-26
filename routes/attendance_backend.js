@@ -135,6 +135,23 @@ router.get('/class-activity/:date', auth, async (req, res) => {
   }
 });
 
+
+// GET /api/attendance/:studentId/month/:year/:month  — all records for a month (batch)
+router.get('/:studentId/month/:year/:month', auth, async (req, res) => {
+  try {
+    const { studentId, year, month } = req.params;
+    const mm = month.padStart(2, '0');
+    const prefix = `${year}-${mm}`;
+    const records = await Attendance.find({
+      studentId,
+      date: { $regex: `^${prefix}` }
+    });
+    res.json(records);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // GET /api/attendance/:studentId  — all records for a student
 router.get('/:studentId', auth, async (req, res) => {
   try {

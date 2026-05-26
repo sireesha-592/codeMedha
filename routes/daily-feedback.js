@@ -18,7 +18,7 @@ router.get('/trainees', auth, adminOnly, async (req, res) => {
     const { courseId, date } = req.query;
     if (!courseId || !date) return res.status(400).json({ message: 'courseId and date required' });
 
-    const trainees = await User.find({ role: 'trainee', enrolledCourse: courseId }).select('_id name email');
+    const trainees = await User.find({ role: { $in: ['student', 'trainee'] }, enrolledCourse: courseId }).select('_id name email');
 
     const [submissions, attendances, feedbacks] = await Promise.all([
       AssignmentSubmission.find({ courseId, date }),

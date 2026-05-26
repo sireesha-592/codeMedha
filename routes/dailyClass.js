@@ -50,12 +50,18 @@ router.post('/upload', auth, upload.single('video'), async (req, res) => {
   }
 });
 
-/* ── Get ALL classes (for notifications page) ── */
+/* ── Get ALL classes (for notifications page + calendar batch) ── */
 router.get('/all', auth, async (req, res) => {
   try {
-    const classes = await DailyClass.find()
+    const { year, month } = req.query;
+    let query = {};
+    if (year && month) {
+      const mm = month.padStart(2, '0');
+      query.date = { $regex: `^${year}-${mm}` };
+    }
+    const classes = await DailyClass.find(query)
       .sort({ createdAt: -1 })
-      .limit(20)
+      .limit(year && month ? 100 : 20)
       .populate('courseId', 'title');
     res.json(classes);
   } catch (err) {

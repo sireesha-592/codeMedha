@@ -148,6 +148,23 @@ router.get('/leaderboard', auth, async (req, res) => {
 });
 
 // GET single submission — recalculate counts on load
+
+// GET /api/submissions/:traineeId/month/:year/:month  — all submissions for a month (batch)
+router.get('/:traineeId/month/:year/:month', auth, async (req, res) => {
+  try {
+    const { traineeId, year, month } = req.params;
+    const mm = month.padStart(2, '0');
+    const prefix = `${year}-${mm}`;
+    const subs = await AssignmentSubmission.find({
+      traineeId,
+      date: { $regex: `^${prefix}` }
+    });
+    res.json(subs);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 router.get('/:traineeId/:date', auth, async (req, res) => {
   try {
     const submission = await AssignmentSubmission.findOne({
