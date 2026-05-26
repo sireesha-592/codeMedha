@@ -254,5 +254,5 @@ mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => console.error('❌ DB Error:', err));
-  
+  app.use('/api/run-code', require('./routes/run-code'));
 module.exports = { io };
