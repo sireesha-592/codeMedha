@@ -68,14 +68,31 @@ router.get('/dashboard', auth, trainerOnly, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 router.get('/students', auth, trainerOnly, async (req, res) => {
   try {
-    const { User } = getModels();
+    const { User, Attendance, Submission } = getModels();
     const { courseId } = req.query;
     const filter = { role: { $in: ['student', 'trainee'] } };
     if (courseId) filter.enrolledCourse = courseId;
     const students = await User.find(filter)
       .select('name email phone enrolledCourse parentName parentPhone')
       .lean();
-    res.json(students);
+
+    const studentIds = students.map(s => s._id);
+    const [attRecords, subRecords] = await Promise.all([
+      Attendance.find({ studentId: { $in: studentIds } }).lean(),
+      Submission.find({ traineeId: { $in: studentIds }, status: 'submitted' }).lean(),
+    ]);
+
+    const result = students.map(s => {
+      const sid = s._id.toString();
+      const myAtt = attRecords.filter(a => a.studentId?.toString() === sid);
+      const present = myAtt.filter(a => a.status === 'present').length;
+      const total   = myAtt.filter(a => ['present','absent'].includes(a.status)).length;
+      const attPct  = total > 0 ? Math.round((present / total) * 100) : 0;
+      const subCount = subRecords.filter(s2 => s2.traineeId?.toString() === sid).length;
+      return { ...s, attendancePercentage: attPct, submittedCount: subCount };
+    });
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

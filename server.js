@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // ── Socket.IO ─────────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: (origin, cb) => {
+    origin: (origin, cb) => { 
       if (!origin || ALLOWED_ORIGINS.some(o => origin.startsWith(o))) return cb(null, true);
       cb(new Error('socket CORS'));
     },
