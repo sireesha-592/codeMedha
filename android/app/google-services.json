@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178906121556",
+    "project_id": "codemedha",
+    "storage_bucket": "codemedha.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178906121556:android:f3e04d16bea28f8137f4c1",
+        "android_client_info": {
+          "package_name": "com.codemedhaapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmpKA4Iq0irxdfHYtWXqeYjPwtceR-uGc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
