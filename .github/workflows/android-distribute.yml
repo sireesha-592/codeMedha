@@ -2,7 +2,7 @@ name: Build & Distribute Android APK
 
 on:
   push:
-    branches: [ sirisha ]
+    branches: [ mobile ]
   workflow_dispatch:
 
 jobs:
