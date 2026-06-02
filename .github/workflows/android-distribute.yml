@@ -67,5 +67,5 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
-          file: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          file: android/app/build/outputs/apk/debug/app-debug.apk
           releaseNotes: "Build from commit ${{ github.sha }}"
